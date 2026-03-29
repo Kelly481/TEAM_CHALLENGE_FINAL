@@ -49,8 +49,7 @@ def preprocesar(data: dict) -> pd.DataFrame:
     df["SalaryAgeRatio"]      = df["EstimatedSalary"] / (df["Age"] + 1)
 
     # 3 ── One-Hot Encoding
-    cat_cols = ["Geography", "Gender"]
-    df = pd.get_dummies(df, columns=cat_cols, drop_first=False)
+    df = pd.get_dummies(df, columns=["Geography", "Gender"], drop_first=True)
 
     # 4 ── Alinear columnas con las del modelo
     for col in feature_names:
