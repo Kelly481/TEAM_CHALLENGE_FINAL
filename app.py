@@ -50,7 +50,7 @@ def preprocesar(data: dict) -> pd.DataFrame:
 
     # 3 ── One-Hot Encoding
     cat_cols = ["Geography", "Gender"]
-    df = pd.get_dummies(df, columns=cat_cols, drop_first=True)
+    df = pd.get_dummies(df, columns=cat_cols, drop_first=False)
 
     # 4 ── Alinear columnas con las del modelo
     for col in feature_names:
