@@ -33,31 +33,33 @@ def preprocesar(data: dict) -> pd.DataFrame:
     """
     df = pd.DataFrame([data])
 
-    # 1 ── Capping P1-P99
-    cols_capping = ["Age", "Balance", "CreditScore", "EstimatedSalary"]
-    for col in cols_capping:
-        if col in df.columns and col in capping_bounds:
-            p1, p99 = capping_bounds[col]
+
+    # 1. Capping P1-P99
+    for col, (p1, p99) in capping_bounds.items():
+        if col in df.columns:
             df[col] = df[col].clip(lower=p1, upper=p99)
 
-    # 2 ── Feature Engineering
+    # 2. Feature engineering
     df["balance_per_product"] = df["Balance"] / (df["NumOfProducts"] + 1)
     df["HasBalance"]          = (df["Balance"] > 0).astype(int)
     df["EngagedCustomer"]     = (
         (df["IsActiveMember"] == 1) & (df["NumOfProducts"] > 1)
     ).astype(int)
-    df["SalaryAgeRatio"]      = df["EstimatedSalary"] / (df["Age"] + 1)
+    df["SalaryAgeRatio"] = df["EstimatedSalary"] / (df["Age"] + 1)
 
-    # 3 ── One-Hot Encoding
-    df = pd.get_dummies(df, columns=["Geography", "Gender"], drop_first=True)
+    # 3. One-Hot Encoding manual
+    df["Geography_Germany"] = (df["Geography"] == "Germany").astype(int)
+    df["Geography_Spain"]   = (df["Geography"] == "Spain").astype(int)
+    df["Gender_Male"]       = (df["Gender"] == "Male").astype(int)
+    df = df.drop(columns=["Geography", "Gender"])
 
-    # 4 ── Alinear columnas con las del modelo
+    # 4. Alinear columnas con las del modelo
     for col in feature_names:
         if col not in df.columns:
             df[col] = 0
     df = df[feature_names]
 
-    # 5 ── Escalar
+    # 5. Escalar
     num_cols = df.select_dtypes(include=[np.number]).columns.tolist()
     df[num_cols] = scaler.transform(df[num_cols])
 
