@@ -1,26 +1,107 @@
 # 🏦 API REST — Predicción de Churn Bancario
 
-**Proyecto Final ML · The Bridge Data Science Bootcamp**  
-Autores: Kelly Escalante · Jorge Martinez · Rebeca Prior
+**Autores:** Kelly Escalante · Jorge Martinez · Rebeca Prior  
+**Bootcamp:** Data Science & AI — The Bridge · Abril 2026  
+**Modelo:** XGBoost optimizado | **ROC-AUC:** ~0.87  
+**URL pública:** https://team-challenge-final.onrender.com
 
 ---
 
-## ¿Qué hace esta API?
+## 📡 Endpoints
 
-Predice si un cliente bancario abandonará el banco (`Exited=1`) o permanecerá (`Exited=0`) usando un modelo **XGBoost** optimizado con RandomizedSearchCV (ROC-AUC > 0.86).
+| Endpoint | Método | Descripción |
+|---|---|---|
+| `/` | GET | Documentación de la API |
+| `/predict` | GET | Predicción con parámetros en la URL |
+| `/predict` | POST | Predicción con body JSON |
+| `/health` | GET | Estado del servidor |
+| `/stats` | GET | Top 5 features *(comentado — demo en clase)* |
 
 ---
 
-## Estructura del repositorio
+## 🚀 Cómo usar la API
+
+### Opción 1 — Desde el navegador
+```
+https://team-challenge-final.onrender.com/predict?CreditScore=500&Geography=Germany&Gender=Female&Age=55&Tenure=2&Balance=120000&NumOfProducts=1&HasCrCard=1&IsActiveMember=0&EstimatedSalary=80000
+```
+
+### Opción 2 — Desde Python
+```python
+import requests
+
+BASE_URL = "https://team-challenge-final.onrender.com"
+
+# GET
+params = {
+    "CreditScore": 500, "Geography": "Germany", "Gender": "Female",
+    "Age": 55, "Tenure": 2, "Balance": 120000, "NumOfProducts": 1,
+    "HasCrCard": 1, "IsActiveMember": 0, "EstimatedSalary": 80000
+}
+r = requests.get(f"{BASE_URL}/predict", params=params)
+print(r.json())
+
+# POST
+payload = {
+    "CreditScore": 750, "Geography": "France", "Gender": "Male",
+    "Age": 32, "Tenure": 7, "Balance": 0, "NumOfProducts": 2,
+    "HasCrCard": 1, "IsActiveMember": 1, "EstimatedSalary": 60000
+}
+r = requests.post(f"{BASE_URL}/predict", json=payload)
+print(r.json())
+```
+
+---
+
+## 📋 Parámetros requeridos
+
+| Parámetro | Tipo | Valores válidos |
+|---|---|---|
+| `CreditScore` | int | 300 - 850 |
+| `Geography` | str | France, Germany, Spain |
+| `Gender` | str | Male, Female |
+| `Age` | int | 18 - 92 |
+| `Tenure` | int | 0 - 10 |
+| `Balance` | float | 0.0 - 250000.0 |
+| `NumOfProducts` | int | 1 - 4 |
+| `HasCrCard` | int | 0 o 1 |
+| `IsActiveMember` | int | 0 o 1 |
+| `EstimatedSalary` | float | 0.0 - 200000.0 |
+
+---
+
+## 📊 Ejemplo de respuesta
+
+```json
+{
+  "prediccion": 1,
+  "etiqueta": "ABANDONA el banco",
+  "probabilidad_churn": 0.9637,
+  "nivel_riesgo": "ALTO",
+  "datos_entrada": {}
+}
+```
+
+### Niveles de riesgo
+
+| Nivel | Probabilidad | Acción recomendada |
+|---|---|---|
+| 🟢 BAJO | < 40% | Seguimiento rutinario |
+| 🟡 MEDIO | 40% - 70% | Monitorizar y mejorar condiciones |
+| 🔴 ALTO | > 70% | Activar campaña de retención urgente |
+
+---
+
+## 📁 Estructura del repositorio
 
 ```
-churn_api/
-├── app.py                  ← API Flask (este archivo)
+TEAM_CHALLENGE_FINAL/
+├── app.py                  ← API principal (Flask + Gunicorn)
 ├── requirements.txt        ← Dependencias
-├── README.md               ← Esta guía
+├── runtime.txt             ← Versión Python (3.11.9)
+├── test_api.py             ← Script de pruebas
+├── README.md               ← Esta documentación
 └── src/
-    ├── data_sample/
-    │   └── churn.csv       ← Dataset original
     └── models/
         ├── modelo_churn_bancario.joblib
         ├── scaler.joblib
@@ -30,120 +111,7 @@ churn_api/
 
 ---
 
-## Endpoints
+## ⚠️ Nota sobre el plan gratuito
 
-### `GET /`
-Landing page — devuelve información completa de la API y ejemplos de uso.
-
-### `GET /predict` — Predicción via query params
-```
-/predict?CreditScore=600&Geography=France&Gender=Female&Age=40&Tenure=3&Balance=60000&NumOfProducts=2&HasCrCard=1&IsActiveMember=1&EstimatedSalary=50000
-```
-
-### `POST /predict` — Predicción via JSON
-```json
-{
-  "CreditScore": 600,
-  "Geography": "France",
-  "Gender": "Female",
-  "Age": 40,
-  "Tenure": 3,
-  "Balance": 60000,
-  "NumOfProducts": 2,
-  "HasCrCard": 1,
-  "IsActiveMember": 1,
-  "EstimatedSalary": 50000
-}
-```
-
-**Respuesta:**
-```json
-{
-  "prediccion": 0,
-  "etiqueta": "PERMANECE en el banco",
-  "probabilidad_churn": 0.1823,
-  "nivel_riesgo": "BAJO",
-  "datos_entrada": { ... }
-}
-```
-
-### `GET /health`
-Devuelve el estado del servidor y confirma que el modelo está cargado.
-
----
-
-## Cómo usar con Python `requests`
-
-```python
-import requests
-
-# GET
-url = "https://TU-APP.onrender.com/predict"
-params = {
-    "CreditScore": 600, "Geography": "France", "Gender": "Female",
-    "Age": 40, "Tenure": 3, "Balance": 60000, "NumOfProducts": 2,
-    "HasCrCard": 1, "IsActiveMember": 1, "EstimatedSalary": 50000
-}
-response = requests.get(url, params=params)
-print(response.json())
-
-# POST
-response = requests.post(url, json=params)
-print(response.json())
-```
-
----
-
-## Despliegue en Render — Paso a paso
-
-### 1. Crear el repositorio en GitHub
-```bash
-git init
-git add .
-git commit -m "Initial commit — Churn API"
-git remote add origin https://github.com/TU_USUARIO/churn-api.git
-git push -u origin main
-```
-
-### 2. Crear una cuenta en Render
-Ve a [render.com](https://render.com) y regístrate con tu cuenta de GitHub.
-
-### 3. Crear nuevo Web Service
-- Clic en **New → Web Service**
-- Conecta tu repositorio de GitHub
-- Configura:
-  - **Name:** churn-api (o el nombre que queráis)
-  - **Runtime:** Python 3
-  - **Build Command:** `pip install -r requirements.txt`
-  - **Start Command:** `gunicorn app:app`
-  - **Instance Type:** Free
-
-### 4. Deploy
-- Clic en **Create Web Service**
-- Espera 2-3 minutos a que termine el build
-- Tu API estará disponible en: `https://churn-api.onrender.com`
-
----
-
-## Redespliegue (para la exposición)
-Para descomentar el endpoint `/stats` y redesplegar:
-1. Descomenta el bloque `@app.route("/stats")` en `app.py`
-2. `git add app.py && git commit -m "Add /stats endpoint" && git push`
-3. Render detecta el push y redespliega automáticamente en ~2 min
-
----
-
-## Campos requeridos
-
-| Campo | Tipo | Valores |
-|---|---|---|
-| CreditScore | int | 300–850 |
-| Geography | str | France, Germany, Spain |
-| Gender | str | Male, Female |
-| Age | int | 18–92 |
-| Tenure | int | 0–10 |
-| Balance | float | 0.0 – cualquier valor |
-| NumOfProducts | int | 1–4 |
-| HasCrCard | int | 0 o 1 |
-| IsActiveMember | int | 0 o 1 |
-| EstimatedSalary | float | cualquier valor |
+El servidor gratuito de Render se duerme tras 15 minutos de inactividad.  
+El primer request puede tardar hasta 50 segundos en responder mientras arranca.
