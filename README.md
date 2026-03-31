@@ -1,55 +1,76 @@
-# 🏦 API REST — Predicción de Churn Bancario
+# 🏦 API de Predicción de Churn Bancario
 
-**Autores:** Kelly Escalante · Jorge Martinez · Rebeca Prior  
-**Bootcamp:** Data Science & AI — The Bridge · Abril 2026  
-**Modelo:** XGBoost optimizado | **ROC-AUC:** ~0.87  
-**URL pública:** https://team-challenge-final.onrender.com
+API REST desarrollada en Python para predecir la probabilidad de abandono (churn) de clientes bancarios utilizando un modelo de Machine Learning basado en XGBoost optimizado.
 
 ---
 
-## 📡 Endpoints
+## 🚀 Demo en producción
 
-| Endpoint | Método | Descripción |
-|---|---|---|
-| `/` | GET | Documentación de la API |
-| `/predict` | GET | Predicción con parámetros en la URL |
-| `/predict` | POST | Predicción con body JSON |
-| `/health` | GET | Estado del servidor |
-| `/stats` | GET | Top 5 features *(comentado — demo en clase)* |
+Puedes interactuar directamente con la API desplegada:
+
+🔹 **API (respuesta en JSON)** 👉 https://team-challenge-final.onrender.com/  
+🔹 **Documentación visual interactiva** 👉 https://team-challenge-final.onrender.com/docs  
+🔹 **Health check del servicio** 👉 https://team-challenge-final.onrender.com/health  
+
+> ⚠️ El plan gratuito de Render se duerme tras 15 min de inactividad. El primer request puede tardar hasta 50 segundos en responder.
 
 ---
 
-## 🚀 Cómo usar la API
+## ⚡ Prueba rápida
 
-### Opción 1 — Desde el navegador
+Haz clic en el siguiente enlace para ejecutar una predicción real:
+
 ```
 https://team-challenge-final.onrender.com/predict?CreditScore=500&Geography=Germany&Gender=Female&Age=55&Tenure=2&Balance=120000&NumOfProducts=1&HasCrCard=1&IsActiveMember=0&EstimatedSalary=80000
 ```
 
-### Opción 2 — Desde Python
-```python
-import requests
+---
 
-BASE_URL = "https://team-challenge-final.onrender.com"
+## 🎯 Objetivo del proyecto
 
-# GET
-params = {
-    "CreditScore": 500, "Geography": "Germany", "Gender": "Female",
-    "Age": 55, "Tenure": 2, "Balance": 120000, "NumOfProducts": 1,
-    "HasCrCard": 1, "IsActiveMember": 0, "EstimatedSalary": 80000
-}
-r = requests.get(f"{BASE_URL}/predict", params=params)
-print(r.json())
+Predecir si un cliente bancario abandonará el banco (`Exited = 1`) o permanecerá (`Exited = 0`), permitiendo:
 
-# POST
-payload = {
-    "CreditScore": 750, "Geography": "France", "Gender": "Male",
-    "Age": 32, "Tenure": 7, "Balance": 0, "NumOfProducts": 2,
-    "HasCrCard": 1, "IsActiveMember": 1, "EstimatedSalary": 60000
-}
-r = requests.post(f"{BASE_URL}/predict", json=payload)
-print(r.json())
-```
+- Identificar clientes en riesgo
+- Optimizar estrategias de retención
+- Tomar decisiones basadas en datos
+
+---
+
+## 🧠 Modelo de Machine Learning
+
+- **Algoritmo:** XGBoost Classifier
+- **Optimización:** RandomizedSearchCV
+- **Métrica principal:** ROC-AUC ≈ 0.86 - 0.87
+- **Dataset:** 10.000 clientes bancarios europeos
+
+---
+
+## ⚙️ Pipeline de datos
+
+El modelo en producción replica exactamente el pipeline de entrenamiento:
+
+1. **Capping (P1 - P99)** para control de outliers
+2. **Feature Engineering:**
+   - `balance_per_product`
+   - `HasBalance`
+   - `EngagedCustomer`
+   - `SalaryAgeRatio`
+3. **One-Hot Encoding manual**
+4. **Alineación de features**
+5. **Escalado con StandardScaler**
+
+---
+
+## 📡 Endpoints disponibles
+
+| Endpoint | Método | Descripción |
+|---|---|---|
+| `/` | GET | Información general de la API (JSON) |
+| `/docs` | GET | Documentación visual interactiva |
+| `/predict` | GET | Predicción mediante query params |
+| `/predict` | POST | Predicción mediante JSON |
+| `/health` | GET | Estado del servicio |
+| `/stats` | GET | Top 10 features importantes *(comentado — demo en clase)* |
 
 ---
 
@@ -70,7 +91,24 @@ print(r.json())
 
 ---
 
-## 📊 Ejemplo de respuesta
+## 📥 Ejemplo de request (POST)
+
+```json
+{
+  "CreditScore": 600,
+  "Geography": "France",
+  "Gender": "Female",
+  "Age": 40,
+  "Tenure": 3,
+  "Balance": 60000,
+  "NumOfProducts": 2,
+  "HasCrCard": 1,
+  "IsActiveMember": 1,
+  "EstimatedSalary": 50000
+}
+```
+
+## 📤 Ejemplo de respuesta
 
 ```json
 {
@@ -89,6 +127,27 @@ print(r.json())
 | 🟢 BAJO | < 40% | Seguimiento rutinario |
 | 🟡 MEDIO | 40% - 70% | Monitorizar y mejorar condiciones |
 | 🔴 ALTO | > 70% | Activar campaña de retención urgente |
+
+---
+
+## 🧱 Tecnologías utilizadas
+
+- Python
+- Flask + Gunicorn
+- Scikit-learn
+- XGBoost
+- Pandas / NumPy
+- Joblib
+- Render (deploy)
+
+---
+
+## 🏗️ Arquitectura
+
+- API REST para inferencia en tiempo real
+- Modelo serializado (`.joblib`)
+- Pipeline de preprocesado integrado
+- Despliegue en cloud (Render)
 
 ---
 
@@ -111,7 +170,29 @@ TEAM_CHALLENGE_FINAL/
 
 ---
 
-## ⚠️ Nota sobre el plan gratuito
+## 👥 Autores
 
-El servidor gratuito de Render se duerme tras 15 minutos de inactividad.  
-El primer request puede tardar hasta 50 segundos en responder mientras arranca.
+- Kelly Escalante
+- Jorge Martinez
+- Rebeca Prior
+
+**Bootcamp Data Science & AI — The Bridge · Abril 2026**
+
+---
+
+## 📌 Estado del proyecto
+
+✅ Modelo entrenado y optimizado  
+✅ API desplegada en producción  
+✅ Documentación interactiva  
+✅ Pipeline reproducible  
+
+---
+
+## 🚀 Próximas mejoras
+
+- Añadir explicabilidad del modelo (SHAP)
+- Logging de predicciones
+- Tests automatizados
+- Dockerización completa
+- Monitorización (MLOps)
