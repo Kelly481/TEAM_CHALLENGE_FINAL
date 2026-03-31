@@ -189,10 +189,3 @@ TEAM_CHALLENGE_FINAL/
 
 ---
 
-## 🚀 Próximas mejoras
-
-- Añadir explicabilidad del modelo (SHAP)
-- Logging de predicciones
-- Tests automatizados
-- Dockerización completa
-- Monitorización (MLOps)
